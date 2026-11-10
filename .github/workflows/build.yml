@@ -1,0 +1,86 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-1-21-11:
+    name: Minecraft 1.21.11 (Java 21)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.2.1
+
+      - name: Build
+        run: |
+          set +e
+          FAPI=$(curl -s -A "anx-auction-ci" 'https://api.modrinth.com/v2/project/fabric-api/version?game_versions=%5B%221.21.11%22%5D&loaders=%5B%22fabric%22%5D' | jq -r '.[0].version_number // empty')
+          LOADER=$(curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '[.[]|select(.stable)][0].version // empty')
+          YARN=$(curl -s https://meta.fabricmc.net/v2/versions/yarn/1.21.11 | jq -r '.[0].version // empty')
+          echo "Fabric API: $FAPI"
+          echo "Loader: $LOADER"
+          echo "Yarn: $YARN"
+          ARGS=""
+          if [ -n "$FAPI" ]; then ARGS="$ARGS -Pfabric_version=$FAPI"; fi
+          if [ -n "$LOADER" ]; then ARGS="$ARGS -Ploader_version=$LOADER"; fi
+          if [ -n "$YARN" ]; then ARGS="$ARGS -Pyarn_mappings=$YARN"; fi
+          set -e
+          gradle build --no-daemon $ARGS
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: anx-auction-mod-1.21.11
+          path: build/libs/anx-auction-mod-*.jar
+
+  build-26-2:
+    name: Minecraft 26.2 (Java 25)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.5.1
+
+      - name: Build
+        working-directory: mc-26.2
+        run: |
+          set +e
+          FAPI=$(curl -s -A "anx-auction-ci" 'https://api.modrinth.com/v2/project/fabric-api/version?game_versions=%5B%2226.2%22%5D&loaders=%5B%22fabric%22%5D' | jq -r '.[0].version_number // empty')
+          LOADER=$(curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '[.[]|select(.stable)][0].version // empty')
+          echo "Fabric API: $FAPI"
+          echo "Loader: $LOADER"
+          ARGS=""
+          if [ -n "$FAPI" ]; then ARGS="$ARGS -Pfabric_version=$FAPI"; fi
+          if [ -n "$LOADER" ]; then ARGS="$ARGS -Ploader_version=$LOADER"; fi
+          set -e
+          gradle build --no-daemon $ARGS
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: anx-auction-mod-26.2
+          path: mc-26.2/build/libs/anx-auction-mod-*.jar
+          
