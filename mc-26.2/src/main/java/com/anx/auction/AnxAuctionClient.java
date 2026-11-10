@@ -253,7 +253,7 @@ public final class AnxAuctionClient implements ClientModInitializer {
             return;
         }
         client.player.sendSystemMessage(Component.literal("[_anx Auction] ").withStyle(ChatFormatting.GOLD)
-                .append(Component.literal(message).withStyle(color)), false);
+                .append(Component.literal(message).withStyle(color)));
     }
 
     private static void playSound(Minecraft client, SoundEvent sound, float volume, float pitch) {
