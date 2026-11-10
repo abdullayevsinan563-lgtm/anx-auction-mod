@@ -54,7 +54,7 @@ public final class HudEditScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
-        int[] box = AuctionHud.dimensions(textRenderer, width);
+        int[] box = AuctionHud.bounds(textRenderer, width);
         long now = System.currentTimeMillis();
         if (box != null) {
             int color = Ui.lerp(Ui.ACCENT, 0xFFFFFFFF, Ui.pulse(now, 1200) * 0.5);
